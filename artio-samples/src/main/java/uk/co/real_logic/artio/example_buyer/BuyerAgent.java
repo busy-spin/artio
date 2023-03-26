@@ -26,14 +26,16 @@ public class BuyerAgent implements Agent
             .libraryAeronChannel(IPC_CHANNEL);
 
         engineConfiguration
-            .aeronContext()
-            .aeronDirectoryName(AERON_DIRECTORY_NAME);
+                .logOutboundMessages(false)
+                .logInboundMessages(false)
+                .aeronContext()
+                .aeronDirectoryName(AERON_DIRECTORY_NAME);
 
-        engineConfiguration
+        /*engineConfiguration
             .aeronArchiveContext()
             .recordingEventsChannel(RECORDING_EVENTS_CHANNEL)
             .aeronDirectoryName(AERON_DIRECTORY_NAME);
-
+*/
         cleanupOldLogFileDir(engineConfiguration);
 
         engine = FixEngine.launch(engineConfiguration);

@@ -15,9 +15,6 @@
  */
 package uk.co.real_logic.artio.example_buyer;
 
-import io.aeron.archive.Archive;
-import io.aeron.archive.ArchiveThreadingMode;
-import io.aeron.archive.ArchivingMediaDriver;
 import io.aeron.driver.MediaDriver;
 import uk.co.real_logic.artio.SampleUtil;
 
@@ -43,18 +40,18 @@ public final class BuyerApplication
             .dirDeleteOnStart(true)
             .aeronDirectoryName(AERON_DIRECTORY_NAME);
 
-        final Archive.Context archiveContext = new Archive.Context()
+        /*final Archive.Context archiveContext = new Archive.Context()
             .threadingMode(ArchiveThreadingMode.SHARED)
             .deleteArchiveOnStart(true)
             .aeronDirectoryName(AERON_DIRECTORY_NAME)
             .recordingEventsChannel(RECORDING_EVENTS_CHANNEL)
-            .archiveDirectoryName(AERON_ARCHIVE_DIRECTORY_NAME);
+            .archiveDirectoryName(AERON_ARCHIVE_DIRECTORY_NAME);*/
 
-        try (ArchivingMediaDriver driver = ArchivingMediaDriver.launch(context, archiveContext))
+        try (MediaDriver mediaDriver = MediaDriver.launch(context))
         {
             SampleUtil.runAgentUntilSignal(
                 new BuyerAgent(),
-                driver.mediaDriver());
+                mediaDriver);
         }
     }
 }

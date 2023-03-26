@@ -50,7 +50,7 @@ public final class ExchangeApplication
         final EngineConfiguration configuration = new EngineConfiguration()
             .bindTo("localhost", 9999)
             .libraryAeronChannel(IPC_CHANNEL)
-            .logFileDir("exchange-application");
+            .logFileDir("exchange-application").logOutboundMessages(false).logInboundMessages(false);
 
         configuration.authenticationStrategy(authenticationStrategy);
 
@@ -61,15 +61,15 @@ public final class ExchangeApplication
             .sharedIdleStrategy(backoffIdleStrategy())
             .dirDeleteOnStart(true);
 
-        final Archive.Context archiveContext = new Archive.Context()
+/*        final Archive.Context archiveContext = new Archive.Context()
             .threadingMode(ArchiveThreadingMode.SHARED)
             .idleStrategySupplier(CommonConfiguration::backoffIdleStrategy)
-            .deleteArchiveOnStart(true);
+            .deleteArchiveOnStart(true);*/
 
-        try (ArchivingMediaDriver driver = ArchivingMediaDriver.launch(context, archiveContext);
+        try (MediaDriver driver = MediaDriver.launch(context);
             FixEngine gateway = FixEngine.launch(configuration))
         {
-            SampleUtil.runAgentUntilSignal(new ExchangeAgent(), driver.mediaDriver());
+            SampleUtil.runAgentUntilSignal(new ExchangeAgent(), driver);
         }
 
         System.exit(0);
