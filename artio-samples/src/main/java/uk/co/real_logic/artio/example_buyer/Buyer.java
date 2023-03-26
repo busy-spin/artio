@@ -177,6 +177,7 @@ public class Buyer implements LibraryConnectHandler, SessionHandler, SessionAcqu
 
     public Action onDisconnect(final int libraryId, final Session session, final DisconnectReason reason)
     {
+        System.out.println("Fix session disconnected !!!");
         state = State.LIBRARY_CONNECTED;
 
         return CONTINUE;
