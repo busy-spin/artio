@@ -50,7 +50,9 @@ public final class ExchangeApplication
         final EngineConfiguration configuration = new EngineConfiguration()
             .bindTo("localhost", 9999)
             .libraryAeronChannel(IPC_CHANNEL)
-            .logFileDir("exchange-application").logOutboundMessages(false).logInboundMessages(false);
+            .logFileDir("exchange-application")
+            .logOutboundMessages(false)
+            .logInboundMessages(false);
 
         configuration.authenticationStrategy(authenticationStrategy);
 

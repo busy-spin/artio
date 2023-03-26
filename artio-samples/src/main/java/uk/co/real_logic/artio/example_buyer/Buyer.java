@@ -10,7 +10,13 @@ import uk.co.real_logic.artio.builder.NewOrderSingleEncoder;
 import uk.co.real_logic.artio.decoder.ExecutionReportDecoder;
 import uk.co.real_logic.artio.fields.DecimalFloat;
 import uk.co.real_logic.artio.fields.UtcTimestampEncoder;
-import uk.co.real_logic.artio.library.*;
+import uk.co.real_logic.artio.library.FixLibrary;
+import uk.co.real_logic.artio.library.LibraryConnectHandler;
+import uk.co.real_logic.artio.library.OnMessageInfo;
+import uk.co.real_logic.artio.library.SessionAcquireHandler;
+import uk.co.real_logic.artio.library.SessionAcquiredInfo;
+import uk.co.real_logic.artio.library.SessionConfiguration;
+import uk.co.real_logic.artio.library.SessionHandler;
 import uk.co.real_logic.artio.messages.DisconnectReason;
 import uk.co.real_logic.artio.session.Session;
 import uk.co.real_logic.artio.util.MutableAsciiBuffer;
@@ -29,6 +35,12 @@ public class Buyer implements LibraryConnectHandler, SessionHandler, SessionAcqu
         SESSION_CONNECTED,
         AWAITING_FILL
     }
+
+    final SessionConfiguration sessionConfig = SessionConfiguration.builder()
+            .address("localhost", 9999)
+            .targetCompId(ACCEPTOR_COMP_ID)
+            .senderCompId(INITIATOR_COMP_ID)
+            .build();
 
     private final MutableAsciiBuffer asciiBuffer = new MutableAsciiBuffer();
     private final NewOrderSingleEncoder newOrderSingle = new NewOrderSingleEncoder();
@@ -84,19 +96,13 @@ public class Buyer implements LibraryConnectHandler, SessionHandler, SessionAcqu
                 System.out.println("Session Connected");
                 session = initiateReply.resultIfPresent();
                 state = State.SESSION_CONNECTED;
+                initiateReply = null;
             }
             else
             {
-                System.err.printf("Session connect failed %s%n", initiateReply.state());
-                final Throwable error = initiateReply.error();
-                if (error != null)
-                {
-                    error.printStackTrace();
-                }
-                System.exit(-1);
+                // keep retrying ...
+               connectSession();
             }
-
-            initiateReply = null;
         }
     }
 
@@ -105,17 +111,12 @@ public class Buyer implements LibraryConnectHandler, SessionHandler, SessionAcqu
         // Each outbound session with an Exchange or broker is represented by
         // a Session object. Each session object can be configured with connection
         // details and credentials.
-        final SessionConfiguration sessionConfig = SessionConfiguration.builder()
-            .address("localhost", 9999)
-            .targetCompId(ACCEPTOR_COMP_ID)
-            .senderCompId(INITIATOR_COMP_ID)
-            .build();
 
         initiateReply = library.initiate(sessionConfig);
 
         state = State.SESSION_CONNECTING;
 
-        System.out.println("Attempting to connect to exchange");
+        // System.out.println("Attempting to connect to exchange");
     }
 
     private void sendOrder()
